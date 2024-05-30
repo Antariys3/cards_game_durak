@@ -13,5 +13,8 @@ class Card:
     def is_trump_card(self, trump_suit):
         return self.suit == trump_suit
 
+    def set_card_as_trump_card(self):
+        self.trump_card = True
+
     def __str__(self):
         return f"{self.suit} {self.name}"

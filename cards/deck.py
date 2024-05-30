@@ -22,6 +22,9 @@ class Deck:
         ]
         random.shuffle(self.cards)
 
-    def set_trump(self):
-        self.trump_suit = self.cards[-1].suit
+    def set_trump(self, trump_suit: str = None) -> None:
+        self.trump_suit = self.cards[-1].suit if trump_suit is None else trump_suit
+        for card in self.cards:
+            if card.is_trump_card(self.trump_suit):
+                card.set_card_as_trump_card()
         print(f"Trump suit for this game is chosen: {self.trump_suit}.\n")

@@ -9,6 +9,7 @@ from cards.player import Player
 class Game:
     def __init__(self):
         self.deck = Deck()
+        self.deck.set_trump()
         self.players: [Player] = [Player("User"), Player("Bot")]
 
     def initialize_game(self):
@@ -57,6 +58,7 @@ class Game:
         # check of trump card is in hand
         players__hand = self.players[0].hand + self.players[1].hand
         suits_in_players__hand = set([card.suit for card in players__hand])
+
         if self.deck.trump_suit not in suits_in_players__hand:
             return False
 

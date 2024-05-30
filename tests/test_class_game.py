@@ -9,55 +9,64 @@ from tests.config import comparison_lists_cards
 
 
 class TestGame:
-
     @pytest.mark.parametrize(
-        "player_hand, bot_hand, expected_player_move, expected_bot_move",
+        "player_hand, bot_hand, trump_suit, expected_player_move, "
+        "expected_bot_move",
         [
             (
                 [Card("9", "♦", 9, trump_card=True)],
                 [Card("Валет", "♦", 11, trump_card=True)],
+                "♦",
                 True,
                 False,
             ),
             (
                 [Card("Валет", "♦", 11, trump_card=True)],
                 [Card("9", "♦", 9, trump_card=True)],
+                "♦",
                 False,
                 True,
             ),
             (
                 [Card("Валет", "♦", 11, trump_card=True)],
                 [Card("9", "♦", 9)],
+                "♦",
                 True,
                 False,
             ),
             (
-                [Card("9", "♦", 9)],
+                [Card("9", "♥", 9)],
                 [Card("Валет", "♦", 11, trump_card=True)],
+                "♦",
                 False,
                 True,
             ),
         ],
     )
     def test_first_move(
-        self, player_hand, bot_hand, expected_player_move, expected_bot_move
+        self, player_hand, bot_hand, trump_suit, expected_player_move,
+            expected_bot_move
     ):
         # Создаём игроков
         player = Player("Player_1")
         player.hand = player_hand
+
         bot = Player("Bot")
         bot.hand = bot_hand
 
         game = Game()
         game.players = [player, bot]
+        game.deck.set_trump(trump_suit)
         game.set_player_to_move_first()
 
         # Проверяем, что player ходит первый
-        assert player.move == expected_player_move
-        assert bot.move == expected_bot_move
+        assert game.players[0].move == expected_player_move
+        assert game.players[1].move == expected_bot_move
+
 
     def test_initialize_game(self):
         game = Game()
+        game.initialize_game()
 
         assert len(game.players[0].hand) == 6
         assert isinstance(game.players[0].hand[0], Card)
@@ -67,6 +76,7 @@ class TestGame:
 
     def test_user_input(self):
         game = Game()
+        game.initialize_game()
 
         with patch("builtins.input", side_effect=["1"]):
             assert game.user_input() == 1
