@@ -3,11 +3,12 @@ from cards.card import Card
 
 class Deck:
     def __init__(self):
-        self.cards: list[Card] = self.create_card()
+        self.cards: list[Card] = self.create_deck()
         self.trump_card: Card | None = None
         self.cards_on_table: list[Card] = []
 
-    def create_card(self) -> list:
+    @staticmethod
+    def create_deck() -> list:
         names = ['6', '7', '8', '9', '10', 'Валет', 'Дама', 'Король', 'Туз']
         suits = ['♦', '♠', '♥', '♣']
         values = range(6, 15)
@@ -19,4 +20,4 @@ class Deck:
     def set_trump_cards(self):
         for card in self.cards:
             if card.suit == self.trump_card.suit:
-                card.trump_card = True
+                card.trump_suit = True

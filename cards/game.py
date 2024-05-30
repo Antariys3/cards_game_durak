@@ -9,7 +9,7 @@ from cards.player import Player
 class Game:
     def __init__(self):
         self.deck = Deck()
-        self.players: [Player] = [Player("User", "user"), Player("Bot", "bot")]
+        self.players: [Player] = [Player("User"), Player("Bot")]
         self.initialize_game()
 
     def initialize_game(self):
@@ -18,10 +18,9 @@ class Game:
             self.deck.trump_card = self.deck.cards[0]
             self.deck.set_trump_cards()
             self.draw_cards()
-            # self.deck.cards_on_table = self.players[0].hand  # delete
             if self.first_move():
                 break
-        self.show_table()
+            self.__init__()
 
     @staticmethod
     def clear_terminal():
@@ -52,7 +51,7 @@ class Game:
         pl_card = player.hand[0]
         bot = self.players[1]
         b_card = bot.hand[0]
-        if pl_card.trump_card and b_card.trump_card:
+        if pl_card.trump_suit and b_card.trump_suit:
             if pl_card.value < b_card.value:
                 player.move = True
                 return True
@@ -60,8 +59,8 @@ class Game:
                 bot.move = True
                 return True
 
-        elif pl_card.trump_card or b_card.trump_card:
-            if pl_card.trump_card:
+        elif pl_card.trump_suit or b_card.trump_suit:
+            if pl_card.trump_suit:
                 player.move = True
                 return True
 
@@ -151,25 +150,25 @@ class Game:
         if not bot.took_cards:
             # не козырная карта бьёт не козырную
             for index, card in enumerate(bot.hand):
-                if card_table.suit == card.suit and card_table.value < card.value and not card_table.trump_card:
+                if card_table.suit == card.suit and card_table.value < card.value and not card_table.trump_suit:
                     self.deck.cards_on_table.append(bot.hand.pop(index))
                     return
             if 4 < len(self.deck.cards) < 15:
                 # козырная карта меньше Вальта бьёт не козырную
                 for index, card in enumerate(bot.hand):
-                    if card.trump_card and card.value < 11 and not card_table.trump_card:
+                    if card.trump_suit and card.value < 11 and not card_table.trump_suit:
                         self.deck.cards_on_table.append(bot.hand.pop(index))
                         return
             if len(self.deck.cards) < 4:
                 # козырная карта бьёт не козырную
                 for index, card in enumerate(bot.hand):
-                    if card.trump_card and not card_table.trump_card:
+                    if card.trump_suit and not card_table.trump_suit:
                         self.deck.cards_on_table.append(bot.hand.pop(index))
                         return
             if len(self.deck.cards) < 4:
                 # козырная карта бьёт козырную
                 for index, card in enumerate(bot.hand):
-                    if card_table.trump_card and card.trump_card and card.value > card_table.value:
+                    if card_table.trump_suit and card.trump_suit and card.value > card_table.value:
                         self.deck.cards_on_table.append(bot.hand.pop(index))
                         return
             print("Бот берёт карты, подкидываем или отбой?")
@@ -197,7 +196,7 @@ class Game:
     def move_bot_attack(self):
         bot = self.players[1]
         for index, card in enumerate(bot.hand):
-            if not card.trump_card:
+            if not card.trump_suit:
                 # если пустой стол, ходим первой не козырной картой
                 self.deck.cards_on_table.append(bot.hand.pop(index))
                 return
@@ -214,11 +213,11 @@ class Game:
                 for index, card_bot in enumerate(bot.hand):
                     # если в колоде больше 12 карт, то подкидываем всё кроме козырей и ниже Вальтов
                     if len(self.deck.cards) > 12 and card_bot.value < 10:
-                        if not card_bot.trump_card and card_table.value == card_bot.value:
+                        if not card_bot.trump_suit and card_table.value == card_bot.value:
                             self.deck.cards_on_table.append(bot.hand.pop(index))
                     # если в колоде меньше 12 карт, то подкидываем всё кроме козырей
                     elif 4 < len(self.deck.cards) < 12:
-                        if not card_bot.trump_card and card_table.value == card_bot.value:
+                        if not card_bot.trump_suit and card_table.value == card_bot.value:
                             self.deck.cards_on_table.append(bot.hand.pop(index))
                     # если в колоде меньше 4 карт, то подкидываем всё
                     elif len(self.deck.cards) < 4 and card_table.value == card_bot.value:
@@ -232,21 +231,21 @@ class Game:
             for index, card_bot in enumerate(bot.hand):
                 # если в колоде больше 12 карт, то подкидываем всё кроме козырей и ниже Вальтов
                 if len(self.deck.cards) > 12 and card_bot.value < 10:
-                    if not card_bot.trump_card and card_table.value == card_bot.value:
+                    if not card_bot.trump_suit and card_table.value == card_bot.value:
                         self.deck.cards_on_table.append(bot.hand.pop(index))
                         return
                 # если в колоде меньше 12 карт, то подкидываем всё кроме козырей
                 elif 4 < len(self.deck.cards) < 12:
-                    if not card_bot.trump_card and card_table.value == card_bot.value:
+                    if not card_bot.trump_suit and card_table.value == card_bot.value:
                         self.deck.cards_on_table.append(bot.hand.pop(index))
                         return
                 # если в колоде меньше 4 карт, то подкидываем всё
                 elif len(self.deck.cards) < 4 and card_table.value == card_bot.value:
                     self.deck.cards_on_table.append(bot.hand.pop(index))
                     return
-                else:
-                    print("Отбой!")
-                    bot.move = False
+        else:
+            print("Отбой!")
+            bot.move = False
 
     def move_player_defense(self):
         user = self.players[0]
@@ -261,7 +260,7 @@ class Game:
                 card_table = self.deck.cards_on_table[-1]
                 player_card: Card = user.hand[user_input - 1]
                 if (card_table.suit == player_card.suit and card_table.value < player_card.value or
-                        not card_table.trump_card and player_card.trump_card):
+                        not card_table.trump_suit and player_card.trump_suit):
                     self.deck.cards_on_table.append(user.hand.pop(user_input - 1))
                     break
             print("Вы ввели не корректные данные. Выберете другой вариант")

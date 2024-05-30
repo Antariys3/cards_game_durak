@@ -8,7 +8,7 @@ from cards.player import Player
 class TestCards:
     def test_deck_length(self):
         cards = Deck()
-        assert len(Deck.create_card(cards)) == 36
+        assert len(Deck.create_deck()) == 36
 
     def test_trump_card(self):
         deck_cards = Deck()
@@ -25,7 +25,7 @@ class TestCards:
         deck_cards.trump_card = deck_cards.cards[0]
         deck_cards.set_trump_cards()
         # инициализация козырных кар
-        count_trump_cards = sum(1 for card in deck_cards.cards if card.trump_card)
+        count_trump_cards = sum(1 for card in deck_cards.cards if card.trump_suit)
         assert count_trump_cards == 9
 
 

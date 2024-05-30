@@ -3,7 +3,7 @@ class Card:
         self.name = name
         self.suit = suit
         self.value = value
-        self.trump_card = trump_card
+        self.trump_suit = trump_card
 
     def __repr__(self):
         return f"{self.suit} {self.name}"
