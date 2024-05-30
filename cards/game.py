@@ -24,8 +24,12 @@ class Game:
         player_hand = self.players[0].hand
         bot_hand = self.players[1].hand
         deck_cards = self.deck.cards
-        while deck_cards and (player_hand or bot_hand):
+        while deck_cards and (len(player_hand) >= 0 or len(bot_hand) > 0):
             self.move()
+            if not player_hand:
+                self.info = "Вы выиграли!"
+            elif not bot_hand:
+                self.info = "Вы проиграли!"
 
     @staticmethod
     def clear_terminal():
@@ -43,18 +47,18 @@ class Game:
         if user.move and not bot.took_cards:
             user.move = False
             bot.move = True
-            self.info = self.info + "Инфо: Ход бота"
+            self.info = self.info + " Инфо: Ход бота"
         elif user.move and bot.took_cards:
             bot.took_cards = False
         elif user.move is False and not user.took_cards:
             user.move = True
             bot.move = False
             bot.took_cards = False
-            self.info = self.info + "Инфо: Ваш ход"
+            self.info = self.info + " Инфо: Ваш ход"
         elif user.move is False and user.took_cards:
             user.took_cards = False
             bot.took_cards = False
-            self.info = self.info + "Инфо: Ваш ход"
+            self.info = self.info + " Инфо: Ваш ход"
 
     def first_move(self):
         player = self.players[0]
