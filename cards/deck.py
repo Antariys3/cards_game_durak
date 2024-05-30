@@ -20,7 +20,3 @@ class Deck:
         for card in self.cards:
             if card.suit == self.trump_card.suit:
                 card.trump_card = True
-
-
-
-

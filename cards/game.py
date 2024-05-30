@@ -9,7 +9,7 @@ from cards.player import Player
 class Game:
     def __init__(self):
         self.deck = Deck()
-        self.players: [Player] = [Player("User"), Player("Bot")]
+        self.players: [Player] = [Player("User", "user"), Player("Bot", "bot")]
         self.initialize_game()
 
     def initialize_game(self):
@@ -215,17 +215,17 @@ class Game:
                     # если в колоде больше 12 карт, то подкидываем всё кроме козырей и ниже Вальтов
                     if len(self.deck.cards) > 12 and card_bot.value < 10:
                         if not card_bot.trump_card and card_table.value == card_bot.value:
-                            self.deck.cards_on_table.append(card_bot.hand.pop(index))
+                            self.deck.cards_on_table.append(bot.hand.pop(index))
                     # если в колоде меньше 12 карт, то подкидываем всё кроме козырей
-                    elif 4 > len(self.deck.cards) < 12:
+                    elif 4 < len(self.deck.cards) < 12:
                         if not card_bot.trump_card and card_table.value == card_bot.value:
-                            self.deck.cards_on_table.append(card_bot.hand.pop(index))
+                            self.deck.cards_on_table.append(bot.hand.pop(index))
                     # если в колоде меньше 4 карт, то подкидываем всё
                     elif len(self.deck.cards) < 4 and card_table.value == card_bot.value:
-                        self.deck.cards_on_table.append(card_bot.hand.pop(index))
-                    else:
-                        print("Отбой!")
-                        bot.move = False
+                        self.deck.cards_on_table.append(bot.hand.pop(index))
+            else:
+                print("Отбой!")
+                bot.move = False
             return
 
         for card_table in cards_table:
@@ -233,16 +233,16 @@ class Game:
                 # если в колоде больше 12 карт, то подкидываем всё кроме козырей и ниже Вальтов
                 if len(self.deck.cards) > 12 and card_bot.value < 10:
                     if not card_bot.trump_card and card_table.value == card_bot.value:
-                        self.deck.cards_on_table.append(card_bot.hand.pop(index))
+                        self.deck.cards_on_table.append(bot.hand.pop(index))
                         return
                 # если в колоде меньше 12 карт, то подкидываем всё кроме козырей
-                elif 4 > len(self.deck.cards) < 12:
+                elif 4 < len(self.deck.cards) < 12:
                     if not card_bot.trump_card and card_table.value == card_bot.value:
-                        self.deck.cards_on_table.append(card_bot.hand.pop(index))
+                        self.deck.cards_on_table.append(bot.hand.pop(index))
                         return
                 # если в колоде меньше 4 карт, то подкидываем всё
                 elif len(self.deck.cards) < 4 and card_table.value == card_bot.value:
-                    self.deck.cards_on_table.append(card_bot.hand.pop(index))
+                    self.deck.cards_on_table.append(bot.hand.pop(index))
                     return
                 else:
                     print("Отбой!")
@@ -265,4 +265,3 @@ class Game:
                     self.deck.cards_on_table.append(user.hand.pop(user_input - 1))
                     break
             print("Вы ввели не корректные данные. Выберете другой вариант")
-

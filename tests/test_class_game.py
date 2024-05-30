@@ -334,5 +334,97 @@ class TestGame:
         game.move_bot_attack()
         comparison_lists_cards(game.deck.cards_on_table, expected_cards_on_table)
 
-    def test_bot_flip_cards(self):
-        pass
+    @pytest.mark.parametrize(
+        "deck_cards, cards_on_table, card_hand, bot_move, user_took_cards, expected_bot_move, expected_cards_on_table",
+        [
+            # (
+            #     [Card('Валет', '♦', 11) for _ in range(20)],
+            #     [Card('6', '♦', 6), Card('8', '♦', 8),
+            #      Card('Дама', '♦', 12)],
+            #     [Card('7', '♦', 7), Card('7', '♠', 7),
+            #      Card('6', '♣', 6), Card('8', '♥', 8),
+            #      Card('8', '♠', 8, trump_card=True), Card('Дама', '♠', 12)],
+            #     True, True, False,
+            #     [Card('6', '♦', 6), Card('8', '♦', 8),
+            #      Card('Дама', '♦', 12), Card('6', '♣', 6),
+            #      Card('8', '♥', 8),]
+            # ),
+            # (
+            #     [Card('10', '♦', 10) for _ in range(10)],
+            #     [Card('6', '♦', 6), Card('8', '♦', 8),
+            #      Card('Дама', '♦', 12)],
+            #
+            #     [Card('7', '♦', 7), Card('7', '♠', 7),
+            #      Card('Дама', '♣', 12), Card('8', '♥', 8),
+            #      Card('8', '♠', 8, trump_card=True), Card('Дама', '♠', 12)],
+            #     True, True, False,
+            #     [Card('6', '♦', 6), Card('8', '♦', 8),
+            #      Card('Дама', '♦', 12), Card('8', '♥', 8),
+            #      Card('Дама', '♣', 12), Card('Дама', '♠', 12)]
+            # ),
+            # (
+            #     [Card('10', '♦', 10) for _ in range(3)],
+            #     [Card('6', '♦', 6), Card('8', '♦', 8),
+            #      Card('Дама', '♦', 12)],
+            #     [Card('7', '♦', 7), Card('7', '♠', 7),
+            #      Card('Дама', '♣', 12), Card('8', '♥', 8),
+            #      Card('8', '♠', 8, trump_card=True),],
+            #     True, True, False,
+            #     [Card('6', '♦', 6), Card('8', '♦', 8),
+            #      Card('Дама', '♦', 12), Card('8', '♥', 8),
+            #      Card('Дама', '♣', 12), Card('8', '♠', 8, trump_card=True)]
+            # ),
+            (
+                    [Card('Валет', '♦', 11) for _ in range(20)],
+                    [Card('6', '♦', 6), Card('8', '♦', 8),
+                     Card('Дама', '♦', 12)],
+                    [Card('7', '♦', 7), Card('7', '♠', 7),
+                     Card('6', '♣', 6), Card('8', '♥', 8),
+                     Card('8', '♠', 8, trump_card=True), Card('Дама', '♠', 12)],
+                    True, False, True,
+                    [Card('6', '♦', 6), Card('8', '♦', 8),
+                     Card('Дама', '♦', 12), Card('6', '♣', 6)]
+            ),
+            (
+                    [Card('10', '♦', 10) for _ in range(10)],
+                    [Card('6', '♦', 6), Card('8', '♦', 8),
+                     Card('Дама', '♦', 12)],
+
+                    [Card('7', '♦', 7), Card('7', '♠', 7),
+                     Card('Дама', '♣', 12), Card('8', '♥', 8),
+                     Card('8', '♠', 8, trump_card=True), Card('Дама', '♠', 12)],
+                    True, False, True,
+                    [Card('6', '♦', 6), Card('8', '♦', 8),
+                     Card('Дама', '♦', 12), Card('8', '♥', 8),
+                     Card('Дама', '♣', 12), Card('Дама', '♠', 12)]
+            ),
+            (
+                    [Card('10', '♦', 10) for _ in range(3)],
+                    [Card('6', '♦', 6), Card('8', '♦', 8),
+                     Card('Дама', '♦', 12)],
+                    [Card('7', '♦', 7), Card('7', '♠', 7),
+                     Card('Дама', '♣', 12), Card('8', '♥', 8),
+                     Card('8', '♠', 8, trump_card=True), ],
+                    True, False, True,
+                    [Card('6', '♦', 6), Card('8', '♦', 8),
+                     Card('Дама', '♦', 12), Card('8', '♥', 8),
+                     Card('Дама', '♣', 12), Card('8', '♠', 8, trump_card=True)]
+            ),
+
+        ])
+    def test_bot_flip_cards(self, deck_cards, cards_on_table, card_hand, bot_move, expected_bot_move, user_took_cards,
+                            expected_cards_on_table):
+        game = Game()
+        bot = game.players[1]
+        bot.hand = list(card_hand)
+        bot.move = bot_move
+
+        user = game.players[0]
+        user.took_cards = user_took_cards
+
+        game.deck.cards = deck_cards
+        game.deck.cards_on_table = cards_on_table
+        game.bot_flip_cards()
+
+        assert bot.move == expected_bot_move
+        comparison_lists_cards(game.deck.cards_on_table, expected_cards_on_table)
