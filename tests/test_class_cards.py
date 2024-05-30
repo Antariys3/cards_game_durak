@@ -8,7 +8,7 @@ from cards.player import Player
 class TestCards:
     def test_deck_length(self):
         cards = Deck()
-        assert len(Deck.create_deck()) == 36
+        assert len(cards.create_deck()) == 36
 
     def test_trump_card(self):
         deck_cards = Deck()
