@@ -256,3 +256,53 @@ class TestGame:
         assert len(bot.hand) == expected_len_hand
         comparison_lists_cards(game.deck.cards_on_table, expected_cards_on_table)
         assert bot.took_cards == expected_bot_took_cards
+
+    @pytest.mark.parametrize(
+        "cards_table, card_hand, user_input, user_took_cards, expected_len_cards_table, expected_cards_table,"
+        " expected_user_took_cards",
+        [
+            (
+                    [Card('Валет', '♣', 11)],
+                    [Card('10', '♦', 10), Card('Валет', '♦', 11, )],
+                    ["0"], False, 1,
+                    [Card('Валет', '♣', 11)],
+                    True
+            ),
+            (
+                    [Card('Валет', '♣', 11)],
+                    [Card('10', '♦', 10), Card('Валет', '♦', 11, )],
+                    ["2"], True, 1,
+                    [Card('Валет', '♣', 11)],
+                    True
+            ),
+            (
+                    [Card('Валет', '♣', 11)],
+                    [Card('10', '♦', 10), Card('Валет', '♦', 11, ),
+                     Card('Дама', '♣', 12, )],
+                    ["1", "3"], False, 2,
+                    [Card('Валет', '♣', 11), Card('Дама', '♣', 12, )],
+                    False
+            ),
+            (
+                    [Card('Валет', '♣', 11)],
+                    [Card('10', '♦', 10), Card('Валет', '♦', 11, ),
+                     Card('Дама', '♣', 12, ), Card('7', '♦', 7, trump_card=True)],
+                    ["1", "2", "4"], False, 2,
+                    [Card('Валет', '♣', 11), Card('7', '♦', 7, trump_card=True)],
+                    False
+            )
+
+        ])
+    def test_move_player_defense(self, cards_table, card_hand, user_input, expected_cards_table, user_took_cards,
+                                 expected_user_took_cards, expected_len_cards_table):
+        game = Game()
+        game.deck.cards_on_table = cards_table
+        user = game.players[0]
+        user.took_cards = user_took_cards
+        user.hand = card_hand
+
+        with patch('builtins.input', side_effect=user_input):
+            game.move_player_defense()
+            assert len(game.deck.cards_on_table) == expected_len_cards_table
+            comparison_lists_cards(game.deck.cards_on_table, expected_cards_table)
+            assert user.took_cards == expected_user_took_cards
