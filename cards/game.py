@@ -9,33 +9,38 @@ from cards.player import Player
 class Game:
     def __init__(self):
         self.deck = Deck()
+        self.deck.set_trump()
         self.players: [Player] = [Player("User"), Player("Bot")]
-        self.initialize_game()
 
     def initialize_game(self):
+
+        # draw cards
         while True:
-            random.shuffle(self.deck.cards)
-            self.deck.trump_card = self.deck.cards[0]
-            self.deck.set_trump_cards()
-            self.draw_cards()
+            # set trump
+            self.deck.set_trump()
+
+            # draw cards
+            self.draw_cards_to_players()
+
             # self.deck.cards_on_table = self.players[0].hand  # delete
-            if self.first_move():
-                break
-        self.show_table()
+            if self.set_player_to_move_first():
+                return
+
+            self.__init__()
 
     @staticmethod
     def clear_terminal():
-        os.system('clear')
+        os.system("clear")
 
-    def draw_cards(self):
+    def draw_cards_to_players(self):
+        # draw cards
         [player.draw_cards(self.deck) for player in self.players]
-        [player.sorting_cards() for player in self.players]
 
     def next_turn(self):
         user = self.players[0]
         bot = self.players[1]
         self.deck.cards_on_table.clear()
-        self.draw_cards()
+        self.draw_cards_to_players()
         if user.move and not bot.took_cards:
             user.move = False
             bot.move = True
@@ -47,69 +52,64 @@ class Game:
         elif user.move is False and user.took_cards:
             user.took_cards = False
 
-    def first_move(self):
-        player = self.players[0]
-        pl_card = player.hand[0]
-        bot = self.players[1]
-        b_card = bot.hand[0]
-        if pl_card.trump_card and b_card.trump_card:
-            if pl_card.value < b_card.value:
-                player.move = True
-                return True
-            else:
-                bot.move = True
-                return True
+    def set_player_to_move_first(self):
+        # check of trump card is in hand
+        players__hand = self.players[0].hand + self.players[1].hand
+        suits_in_players__hand = set([card.suit for card in players__hand])
 
-        elif pl_card.trump_card or b_card.trump_card:
-            if pl_card.trump_card:
-                player.move = True
-                return True
-
-            else:
-                bot.move = True
-                return True
-
-        else:
+        if self.deck.trump_suit not in suits_in_players__hand:
             return False
-            # print("Козырных карт не оказалось, пересдача колоды")
-            # self.initialize_game()
+
+        player = self.players[0]
+        player_highest_card = player.hand[0]
+
+        bot = self.players[1]
+        bot_highest_card = bot.hand[0]
+
+        if player_highest_card.trump_card and bot_highest_card.trump_card:
+            if player_highest_card.value < bot_highest_card.value:
+                player.move = True
+            else:
+                bot.move = True
+        elif player_highest_card.is_trump_card(self.deck.trump_suit):
+            player.move = True
+        else:
+            bot.move = True
+        return True
 
     def announce_first_move(self):
+        if len(self.deck.cards) != 24:
+            return
+
         # Объявление первого хода
-        if len(self.deck.cards) == 24:
-            if self.players[0].move:
-                print("У Вас козырь, вы ходите первые")
-                return
-            print(f"У бота {self.players[1].hand[0]} он походил первый")
+        player_to_move = [player for player in self.players if player.move][0]
+        print(f"У {player_to_move} козырь {self.players[1].hand[0]}, он "
+              f"ходит первый.")
 
     def show_table(self):
-        # self.clear_terminal()
-        print("Карты бота")
-        for card in self.players[1].hand:
-            print(card, end=" | ")
-        print()
+        print(f"Trump suit: {self.deck.trump_suit}\n")
 
-        print(f"Козырная карта: {self.deck.trump_card}")
-        print()
+        cards = " | ".join(str(card) for card in self.players[1].hand)
+        print("Cards of bot: \n" + cards + "\n")
+
+        cards = " | ".join(str(card) for card in self.players[0].hand)
+        print("Cards of User: \n" + cards + "\n")
+
+        self.announce_first_move()
+
+        print("_" * 60)
 
         if self.deck.cards_on_table:
             print("Карты на столе: ")
             for card in self.deck.cards_on_table:
                 print(card, end=" | ")
-            print()
-            print()
-
-        print("Мои карты")
-        for card in self.players[0].hand:
-            print(card, end=" | ")
-        print()
-        self.announce_first_move()
-        print("_" * 60)
 
     def user_input(self):
         check_list = [i for i in range(0, len(self.players[0].hand) + 1)]
         while True:
-            user = input(f"0 - отбой или забрать карты. Выбери карту 1-{len(check_list)}: ")
+            user = input(
+                f"0 - отбой или забрать карты. Выбери карту 1-{len(check_list)}: "
+            )
             if user.isdigit() and int(user) in check_list:
                 return int(user)
             print("Ошибка, такой команды нету")
@@ -129,7 +129,11 @@ class Game:
             if user_input != 0:
                 self.move_player_attack(user_input)
                 self.move_bot_defense()
-            elif user_input == 0 and self.deck.cards_on_table and not bot.took_cards:
+            elif (
+                    user_input == 0
+                    and self.deck.cards_on_table
+                    and not bot.took_cards
+            ):
                 self.next_turn()
             if bot.took_cards and user_input == 0:
                 bot.pick_up_card(deck=self.deck)
@@ -138,11 +142,15 @@ class Game:
     def move_player_attack(self, user_input):
         user_card: Card = self.players[0].hand[user_input - 1]
         if not self.deck.cards_on_table:
-            self.deck.cards_on_table.append(self.players[0].hand.pop(user_input - 1))
+            self.deck.cards_on_table.append(
+                self.players[0].hand.pop(user_input - 1)
+            )
             return
         for card in self.deck.cards_on_table:
             if card.value == user_card.value:
-                self.deck.cards_on_table.append(self.players[0].hand.pop(user_input - 1))
+                self.deck.cards_on_table.append(
+                    self.players[0].hand.pop(user_input - 1)
+                )
                 return
 
     def move_bot_defense(self):
@@ -151,13 +159,21 @@ class Game:
         if not bot.took_cards:
             # не козырная карта бьёт не козырную
             for index, card in enumerate(bot.hand):
-                if card_table.suit == card.suit and card_table.value < card.value and not card_table.trump_card:
+                if (
+                        card_table.suit == card.suit
+                        and card_table.value < card.value
+                        and not card_table.trump_card
+                ):
                     self.deck.cards_on_table.append(bot.hand.pop(index))
                     return
             if 4 < len(self.deck.cards) < 15:
                 # козырная карта меньше Вальта бьёт не козырную
                 for index, card in enumerate(bot.hand):
-                    if card.trump_card and card.value < 11 and not card_table.trump_card:
+                    if (
+                            card.trump_card
+                            and card.value < 11
+                            and not card_table.trump_card
+                    ):
                         self.deck.cards_on_table.append(bot.hand.pop(index))
                         return
             if len(self.deck.cards) < 4:
@@ -169,7 +185,11 @@ class Game:
             if len(self.deck.cards) < 4:
                 # козырная карта бьёт козырную
                 for index, card in enumerate(bot.hand):
-                    if card_table.trump_card and card.trump_card and card.value > card_table.value:
+                    if (
+                            card_table.trump_card
+                            and card.trump_card
+                            and card.value > card_table.value
+                    ):
                         self.deck.cards_on_table.append(bot.hand.pop(index))
                         return
             print("Бот берёт карты, подкидываем или отбой?")
@@ -184,15 +204,16 @@ class Game:
                 self.move_bot_attack()
                 self.move_player_defense()
 
-            if self.deck.cards_on_table:
-                self.bot_flip_cards()
-                self.move_player_defense()
+    def move_player_defense(self, user_input):
+        if self.deck.cards_on_table:
+            self.bot_flip_cards()
+            self.move_player_defense()
 
-            if user.took_cards and not bot.move:
-                user.pick_up_card(deck=self.deck)
-                self.next_turn()
-            elif self.deck.cards_on_table and not bot.move:
-                self.next_turn()
+        if user.took_cards and not bot.move:
+            user.pick_up_card(deck=self.deck)
+            self.next_turn()
+        elif self.deck.cards_on_table and not bot.move:
+            self.next_turn()
 
     def move_bot_attack(self):
         bot = self.players[1]
