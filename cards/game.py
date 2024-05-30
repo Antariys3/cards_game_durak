@@ -13,14 +13,11 @@ class Game:
         self.initialize_game()
 
     def initialize_game(self):
-        while True:
-            random.shuffle(self.deck.cards)
-            self.deck.trump_card = self.deck.cards[0]
-            self.deck.set_trump_cards()
-            self.draw_cards()
-            if self.first_move():
-                break
-            self.__init__()
+        random.shuffle(self.deck.cards)
+        self.deck.trump_card = self.deck.cards[0]
+        self.deck.set_trump_cards()
+        self.draw_cards()
+        self.first_move()
 
     @staticmethod
     def clear_terminal():
@@ -54,24 +51,20 @@ class Game:
         if pl_card.trump_suit and b_card.trump_suit:
             if pl_card.value < b_card.value:
                 player.move = True
-                return True
             else:
                 bot.move = True
-                return True
+            return
 
         elif pl_card.trump_suit or b_card.trump_suit:
             if pl_card.trump_suit:
                 player.move = True
-                return True
-
             else:
                 bot.move = True
-                return True
-
+            return
         else:
-            return False
-            # print("Козырных карт не оказалось, пересдача колоды")
-            # self.initialize_game()
+            print("Козырных карт не оказалось, пересдача колоды")
+            self.__init__()
+            self.initialize_game()
 
     def announce_first_move(self):
         # Объявление первого хода
