@@ -46,8 +46,6 @@ class Game:
             bot.move = False
         elif user.move is False and user.took_cards:
             user.took_cards = False
-        else:
-            print("Приехала функция next_turn")
 
     def first_move(self):
         player = self.players[0]

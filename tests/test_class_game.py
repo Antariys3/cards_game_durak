@@ -306,3 +306,33 @@ class TestGame:
             assert len(game.deck.cards_on_table) == expected_len_cards_table
             comparison_lists_cards(game.deck.cards_on_table, expected_cards_table)
             assert user.took_cards == expected_user_took_cards
+
+    @pytest.mark.parametrize("card_hand, expected_cards_on_table", [
+        (
+          [Card('Кароль', '♠', 13), Card('10', '♠', 10),
+           Card('7', '♦', 7)],
+          [Card('7', '♦', 7)]
+        ),
+        (
+            [Card('Кароль', '♠', 13), Card('10', '♠', 10),
+             Card('7', '♦', 7, trump_card=True)],
+            [Card('10', '♠', 10)]
+        ),
+        (
+            [Card('Кароль', '♠', 13, trump_card=True),
+             Card('10', '♠', 10, trump_card=True),
+             Card('7', '♦', 7, trump_card=True)],
+            [Card('7', '♦', 7, trump_card=True)]
+        ),
+    ])
+    def test_move_bot_attack(self, card_hand, expected_cards_on_table):
+        game = Game()
+
+        bot = game.players[1]
+        bot.hand = card_hand
+        bot.sorting_cards()
+        game.move_bot_attack()
+        comparison_lists_cards(game.deck.cards_on_table, expected_cards_on_table)
+
+    def test_bot_flip_cards(self):
+        pass
