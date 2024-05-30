@@ -1,13 +1,17 @@
 class Card:
+    name: str
+    suit: str
+    value: str
+    trump_card: bool
+
     def __init__(self, name, suit, value, trump_card=False):
         self.name = name
         self.suit = suit
         self.value = value
         self.trump_card = trump_card
 
-    def __repr__(self):
-        return f"{self.suit} {self.name}"
+    def is_trump_card(self, trump_suit):
+        return self.suit == trump_suit
 
     def __str__(self):
         return f"{self.suit} {self.name}"
-

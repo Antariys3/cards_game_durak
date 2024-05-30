@@ -8,7 +8,7 @@ from cards.player import Player
 class TestCards:
     def test_deck_length(self):
         cards = Deck()
-        assert len(Deck.create_card(cards)) == 36
+        assert len(Deck.create_deck(cards)) == 36
 
     def test_trump_card(self):
         deck_cards = Deck()
@@ -23,9 +23,11 @@ class TestCards:
         deck_cards = Deck()
         random.shuffle(deck_cards.cards)
         deck_cards.trump_card = deck_cards.cards[0]
-        deck_cards.set_trump_cards()
+        deck_cards.set_trump()
         # инициализация козырных кар
-        count_trump_cards = sum(1 for card in deck_cards.cards if card.trump_card)
+        count_trump_cards = sum(
+            1 for card in deck_cards.cards if card.trump_card
+        )
         assert count_trump_cards == 9
 
 
@@ -48,12 +50,18 @@ class TestPlayer:
     def test_pick_up_cards(self):
         # Создание начальных карт на столе
         cards_1 = [
-            Card('6', '♦', 6), Card('7', '♦', 7), Card('8', '♦', 8),
-            Card('9', '♦', 9), Card('10', '♦', 10), Card('Валет', '♦', 11),
+            Card("6", "♦", 6),
+            Card("7", "♦", 7),
+            Card("8", "♦", 8),
+            Card("9", "♦", 9),
+            Card("10", "♦", 10),
+            Card("Валет", "♦", 11),
         ]
         # Создание начальных карт в руке игрока
         cards_2 = [
-            Card('Дама', '♦', 12), Card('Кароль', '♦', 13), Card('Туз', '♦', 14),
+            Card("Дама", "♦", 12),
+            Card("Кароль", "♦", 13),
+            Card("Туз", "♦", 14),
         ]
 
         # Настройка колоды и проверка количества карт на столе
@@ -74,15 +82,15 @@ class TestPlayer:
     def test_sorting_cards(self):
         player = Player("Player_1")
         cards = [
-            Card('7', '♦', 7),
-            Card('Валет', '♦', 11, trump_card=True),
-            Card('10', '♦', 10),
-            Card('9', '♦', 9, trump_card=True),
-            Card('8', '♦', 8),
-            Card('6', '♦', 6),
+            Card("7", "♦", 7),
+            Card("Валет", "♦", 11, trump_card=True),
+            Card("10", "♦", 10),
+            Card("9", "♦", 9, trump_card=True),
+            Card("8", "♦", 8),
+            Card("6", "♦", 6),
         ]
         player.hand = cards.copy()
-        player.sorting_cards()
+        player.sort_cards()
         assert player.hand[0] == cards[3]
         assert player.hand[1] == cards[1]
         assert player.hand[2] == cards[5]
