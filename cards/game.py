@@ -10,10 +10,8 @@ class Game:
     def __init__(self):
         self.deck = Deck()
         self.players: [Player] = [Player("User"), Player("Bot")]
-        self.initialize_game()
         self.info = "Инфо: "
 
-    def initialize_game(self):
         random.shuffle(self.deck.cards)
         self.deck.trump_card = self.deck.cards[0]
         self.deck.set_trump_cards()
@@ -54,7 +52,7 @@ class Game:
             user.move = True
             bot.move = False
             bot.took_cards = False
-            self.info = self.info + " Инфо: Ваш ход"
+            self.info = self.info + " Ваш ход"
         elif user.move is False and user.took_cards:
             user.took_cards = False
             bot.took_cards = False
@@ -81,7 +79,6 @@ class Game:
         else:
             print("Козырных карт не оказалось, пересдача колоды")
             self.__init__()
-            self.initialize_game()
 
     def announce_first_move(self):
         # Объявление первого хода
@@ -210,9 +207,10 @@ class Game:
 
             if self.deck.cards_on_table:
                 self.bot_flip_cards()
-                self.move_player_defense() if bot.move else 0
+                self.move_player_defense() if bot.move and not user.took_cards else 0
 
-            if user.took_cards and not bot.move:
+            if user.took_cards:
+                self.bot_flip_cards()
                 user.pick_up_card(deck=self.deck)
                 self.next_turn()
             elif not bot.move:
