@@ -433,22 +433,38 @@ class TestGame:
         comparison_lists_cards(game.deck.cards_on_table, expected_cards_on_table)
 
     @pytest.mark.parametrize(
-        "bot_hand, user_hand, user_input, user_took_cards,"
-        " expected_user_hand, expected_bot_hand, expected_bot_move",
+        "deck_cards, bot_hand, user_hand, user_input, user_took_cards,"
+        " expected_user_hand, expected_bot_hand, expected_bot_move, expected_user_move",
         [
             (
+                [Card('Кароль', '♦', 13) for _ in range(20)],
+                # карты бота
                 [Card('6', '♦', 6), Card('7', '♠', 7),
                  Card('10', '♦', 10), Card('Туз', '♥', 14)],
+                # карты игрока
                 [Card('7', '♦', 7), Card('Валет', '♠', 11),
                  Card('6', '♥', 6), Card('7', '♥', 7),],
                 ["1", "1", "1", "0"],
-                False, 6, 6, False
+                False, 6, 6, False, True
+            ),
+            (
+                [Card('Кароль', '♦', 13) for _ in range(20)],
+                # карты бота
+                [Card('8', '♦', 8), Card('9', '♠', 9),
+                 Card('10', '♣', 10), Card('Туз', '♥', 14)],
+                # карты игрока
+                [Card('9', '♦', 9), Card('Валет', '♣', 11),
+                 Card('6', '♥', 6), Card('7', '♥', 7),
+                 Card('Дама', '♣', 12), Card('Кароль', '♣', 13)],
+                ["1", "0", "6"],
+                False, 7, 6, False, True
             )
 
         ])
-    def test_move_bot(self, user_hand, bot_hand, user_input, user_took_cards,
-                      expected_user_hand, expected_bot_hand, expected_bot_move):
+    def test_move_bot(self, deck_cards, user_hand, bot_hand, user_input, user_took_cards,
+                      expected_user_hand, expected_bot_hand, expected_bot_move, expected_user_move):
         game = Game()
+        game.deck.cards = deck_cards
 
         user = game.players[0]
         user.hand = user_hand
@@ -465,3 +481,41 @@ class TestGame:
         assert len(bot.hand) == expected_bot_hand
         assert game.deck.cards_on_table == []
         assert bot.move == expected_bot_move
+        assert user.move == expected_user_move
+
+    @pytest.mark.parametrize(
+        "trump_card, deck_cards, deck_table_card, user_hand, user_input, bot_hand, expected_info",
+        [
+            (
+                Card('Кароль', '♣', 13, trump_card=True),
+                [Card('Кароль', '♣', 13, trump_card=True), Card('7', '♥', 7),
+                 Card('8', '♥', 8)],
+                [Card('7', '♦', 7), Card('Туз', '♦', 14),
+                 Card('7', '♣', 7)],
+                [Card('9', '♣', 9, trump_card=True), Card('9', '♥', 9),
+                 Card('10', '♥', 10), Card('Кароль', '♥', 13),
+                 Card('Туз', '♠', 14)],
+                ["1", "0"],
+                [Card('6', '♣', 6, trump_card=True), Card('8', '♣', 8, trump_card=True),
+                 Card('Валет', '♣', 11, trump_card=True), Card('Дама', '♥', 12),
+                 Card('Дама', '♦', 12)],
+                " Инфо: Ход бота"
+            )
+        ])
+    def test_play(self, trump_card, deck_cards, deck_table_card, user_hand, user_input, bot_hand, expected_info):
+        game = Game()
+        game.deck.trump_card = trump_card
+        game.deck.deck_table_card = deck_table_card
+        game.deck.cards = deck_cards
+
+        user = game.players[0]
+        user.hand = user_hand
+        user.move = True
+
+        bot = game.players[1]
+        bot.hand = bot_hand
+        bot.move = False
+
+        with patch('builtins.input', side_effect=user_input):
+            game.play()
+            assert game.info == expected_info
