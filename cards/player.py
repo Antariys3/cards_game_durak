@@ -6,7 +6,7 @@ class Player:
         self.took_cards = False
 
     def draw_cards(self, deck):
-        while len(self.hand) < 6 and len(deck.cards) > 0:
+        while deck.cards and len(self.hand) < 6 and len(deck.cards) > 0:
             self.hand.append(deck.cards.pop())
 
     def pick_up_card(self, deck):

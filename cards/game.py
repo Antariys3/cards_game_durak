@@ -22,7 +22,7 @@ class Game:
         player_hand = self.players[0].hand
         bot_hand = self.players[1].hand
         deck_cards = self.deck.cards
-        while deck_cards and (len(player_hand) >= 0 or len(bot_hand) > 0):
+        while deck_cards and (len(player_hand) > 0 or len(bot_hand) > 0):
             self.move()
             if not player_hand:
                 self.info = "Вы выиграли!"
@@ -54,9 +54,10 @@ class Game:
             bot.took_cards = False
             self.info = self.info + " Ваш ход"
         elif user.move is False and user.took_cards:
+            bot.move = True
             user.took_cards = False
             bot.took_cards = False
-            self.info = self.info + " Инфо: Ваш ход"
+            self.info = self.info = "Вы забрали, ход бота"
 
     def first_move(self):
         player = self.players[0]
